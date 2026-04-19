@@ -25,3 +25,6 @@ Thumbs.db
 *.booproj
 *.unityproj
 *.slnx
+*.utmp
+mono_crash.*.json
+*_BurstDebugInformation_DoNotShip/
