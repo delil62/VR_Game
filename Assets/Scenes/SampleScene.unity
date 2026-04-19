@@ -2469,6 +2469,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 830000101}
+  - component: {fileID: 830000102}
   m_Layer: 0
   m_Name: Teleport Points
   m_TagString: Untagged
@@ -2495,6 +2496,30 @@ Transform:
   - {fileID: 830000141}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &830000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830000100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5d7cb4b0d2947b6a0b3c8e96b6a2151, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HoverPrompt: Press Grip to teleport
+  m_BaseColor: {r: 0.1, g: 0.85, b: 1, a: 0.75}
+  m_HoverColor: {r: 1, g: 0.9, b: 0.2, a: 0.95}
+  m_BaseMarkerScale: {x: 0.9, y: 0.03, z: 0.9}
+  m_HoverMarkerScale: {x: 1.15, y: 0.04, z: 1.15}
+  m_PulseAmplitude: 0.08
+  m_PulseSpeed: 2.25
+  m_BobHeight: 0.12
+  m_BobSpeed: 2.8
+  m_TextHeight: 0.22
+  m_ColliderSize: {x: 3, y: 12, z: 3}
+  m_ShowAnchorName: 0
 --- !u!1 &830000110
 GameObject:
   m_ObjectHideFlags: 0
