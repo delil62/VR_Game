@@ -48,12 +48,13 @@ public class TeleportAnchorVisualManager : MonoBehaviour
 
     void Awake()
     {
-        EnsureMaterials();
-        CacheAnchors();
     }
 
     void OnEnable()
     {
+        EnsureMaterials();
+        CacheAnchors();
+
         foreach (var anchor in m_anchors)
             anchor.Bind();
     }
@@ -79,6 +80,11 @@ public class TeleportAnchorVisualManager : MonoBehaviour
     {
         foreach (var anchor in m_anchors)
             anchor.Unbind();
+
+        foreach (var anchor in m_anchors)
+            anchor.Dispose();
+
+        m_anchors.Clear();
     }
 
     void OnDestroy()
