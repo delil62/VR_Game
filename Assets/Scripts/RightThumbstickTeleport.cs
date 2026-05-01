@@ -54,13 +54,20 @@ public class RightThumbstickTeleport : MonoBehaviour
     [SerializeField]
     float m_InputKeepAliveInterval = 2f;
 
+    [SerializeField]
+    float m_InputRecoveryCooldown = 0.5f;
+
     readonly HashSet<Collider> m_SurfaceSet = new();
     static readonly List<UnityEngine.XR.InputDevice> s_InputDevices = new();
     bool m_IsAiming;
     bool m_IsSnapTurnHeld;
     float m_AimingYawOffset;
     float m_NextInputKeepAliveTime;
+    float m_NextForcedInputRecoveryTime;
+    bool m_WasLeftControllerTracked;
+    bool m_WasRightControllerTracked;
     Coroutine m_InputWarmupRoutine;
+    InputAction m_RightThumbstickAction;
     GameObject m_TeleportReticleInstance;
     Behaviour[] m_RightRayLineVisuals;
     LineRenderer m_RightRayLineRenderer;
@@ -68,6 +75,7 @@ public class RightThumbstickTeleport : MonoBehaviour
     void Awake()
     {
         RebuildSurfaceCache();
+        CreateRightThumbstickAction();
         CacheRightRayVisualComponents();
         CreateTeleportReticle();
         SetTeleportAiming(false);
@@ -77,6 +85,7 @@ public class RightThumbstickTeleport : MonoBehaviour
     {
         InputSystem.onDeviceChange += OnInputSystemDeviceChange;
         InputTracking.trackingAcquired += OnTrackingAcquired;
+        m_RightThumbstickAction?.Enable();
         RefreshQuestInput();
         RestartInputWarmup();
         SetTeleportAiming(false);
@@ -91,8 +100,15 @@ public class RightThumbstickTeleport : MonoBehaviour
     {
         InputSystem.onDeviceChange -= OnInputSystemDeviceChange;
         InputTracking.trackingAcquired -= OnTrackingAcquired;
+        m_RightThumbstickAction?.Disable();
         StopInputWarmup();
         SetTeleportAiming(false);
+    }
+
+    void OnDestroy()
+    {
+        m_RightThumbstickAction?.Dispose();
+        m_RightThumbstickAction = null;
     }
 
     void OnApplicationFocus(bool hasFocus)
@@ -115,6 +131,7 @@ public class RightThumbstickTeleport : MonoBehaviour
 
     void Update()
     {
+        UpdateControllerWakeRecovery();
         UpdateInputKeepAlive();
 
         var stick = ReadThumbstick();
@@ -164,6 +181,16 @@ public class RightThumbstickTeleport : MonoBehaviour
 
     Vector2 ReadThumbstick()
     {
+        var actionStick = m_RightThumbstickAction != null && m_RightThumbstickAction.enabled
+            ? m_RightThumbstickAction.ReadValue<Vector2>()
+            : Vector2.zero;
+
+        var deviceStick = ReadThumbstickFromXRDevice();
+        return actionStick.sqrMagnitude >= deviceStick.sqrMagnitude ? actionStick : deviceStick;
+    }
+
+    Vector2 ReadThumbstickFromXRDevice()
+    {
         var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
         if (!device.isValid)
             return Vector2.zero;
@@ -173,14 +200,28 @@ public class RightThumbstickTeleport : MonoBehaviour
             : Vector2.zero;
     }
 
-    void RefreshQuestInput()
+    void RefreshQuestInput(bool forceRebind = false)
     {
+        if (forceRebind)
+            ForceInputSystemDeviceRefresh();
+
         InputDevices.GetDevices(s_InputDevices);
         ProbeControllerInput(XRNode.LeftHand);
         ProbeControllerInput(XRNode.RightHand);
 
         foreach (var actionAsset in Resources.FindObjectsOfTypeAll<InputActionAsset>())
+        {
+            if (forceRebind)
+                actionAsset?.Disable();
+
             actionAsset?.Enable();
+        }
+
+        if (forceRebind && m_RightThumbstickAction != null)
+        {
+            m_RightThumbstickAction.Disable();
+            m_RightThumbstickAction.Enable();
+        }
     }
 
     void UpdateInputKeepAlive()
@@ -201,6 +242,85 @@ public class RightThumbstickTeleport : MonoBehaviour
         device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 _);
         device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out bool _);
         device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out bool _);
+    }
+
+    void CreateRightThumbstickAction()
+    {
+        m_RightThumbstickAction = new InputAction("Right Thumbstick", InputActionType.Value, expectedControlType: "Vector2");
+        m_RightThumbstickAction.AddBinding("<XRController>{RightHand}/{Primary2DAxis}");
+    }
+
+    void UpdateControllerWakeRecovery()
+    {
+        UpdateControllerWakeRecovery(XRNode.LeftHand, ref m_WasLeftControllerTracked);
+        UpdateControllerWakeRecovery(XRNode.RightHand, ref m_WasRightControllerTracked);
+    }
+
+    void UpdateControllerWakeRecovery(XRNode node, ref bool wasTracked)
+    {
+        var isTracked = IsControllerTracked(node);
+        if (isTracked && !wasTracked)
+            ForceQuestInputRecovery();
+
+        wasTracked = isTracked;
+    }
+
+    static bool IsControllerTracked(XRNode node)
+    {
+        var device = InputDevices.GetDeviceAtXRNode(node);
+        if (!device.isValid)
+            return false;
+
+        if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out var isTracked))
+            return isTracked;
+
+        if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trackingState, out InputTrackingState trackingState))
+            return (trackingState & (InputTrackingState.Position | InputTrackingState.Rotation)) != 0;
+
+        return true;
+    }
+
+    void ForceQuestInputRecovery()
+    {
+        if (Time.unscaledTime < m_NextForcedInputRecoveryTime)
+            return;
+
+        m_NextForcedInputRecoveryTime = Time.unscaledTime + m_InputRecoveryCooldown;
+        RefreshQuestInput(true);
+        RestartInputWarmup();
+    }
+
+    static void ForceInputSystemDeviceRefresh()
+    {
+        foreach (var device in InputSystem.devices)
+        {
+            if (!IsXRInputSystemDevice(device))
+                continue;
+
+            if (!device.enabled)
+                InputSystem.EnableDevice(device);
+
+            InputSystem.QueueConfigChangeEvent(device);
+            InputSystem.ResetDevice(device);
+        }
+    }
+
+    static bool IsXRInputSystemDevice(UnityEngine.InputSystem.InputDevice device)
+    {
+        return ContainsIgnoreCase(device.layout, "XR") ||
+               ContainsIgnoreCase(device.layout, "Quest") ||
+               ContainsIgnoreCase(device.layout, "Oculus") ||
+               ContainsIgnoreCase(device.description.interfaceName, "XR") ||
+               ContainsIgnoreCase(device.description.product, "Quest") ||
+               ContainsIgnoreCase(device.description.product, "Oculus") ||
+               ContainsIgnoreCase(device.description.manufacturer, "Meta") ||
+               ContainsIgnoreCase(device.description.manufacturer, "Oculus");
+    }
+
+    static bool ContainsIgnoreCase(string value, string search)
+    {
+        return !string.IsNullOrEmpty(value) &&
+               value.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     void RestartInputWarmup()
@@ -238,8 +358,7 @@ public class RightThumbstickTeleport : MonoBehaviour
             change == InputDeviceChange.ConfigurationChanged ||
             change == InputDeviceChange.UsageChanged)
         {
-            RefreshQuestInput();
-            RestartInputWarmup();
+            ForceQuestInputRecovery();
         }
     }
 
@@ -248,8 +367,7 @@ public class RightThumbstickTeleport : MonoBehaviour
         if (nodeState.nodeType != XRNode.LeftHand && nodeState.nodeType != XRNode.RightHand)
             return;
 
-        RefreshQuestInput();
-        RestartInputWarmup();
+        ForceQuestInputRecovery();
     }
 
     void HandleSnapTurn(Vector2 stick)

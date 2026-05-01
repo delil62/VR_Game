@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -30,6 +31,7 @@ public class LightSwitchInteractable : MonoBehaviour
 
     XRSimpleInteractable m_Interactable;
     Camera m_MainCamera;
+    InputAction m_FallbackActivationAction;
     bool m_WasFallbackPressed;
 
     public bool isOn => m_IsOn;
@@ -40,6 +42,7 @@ public class LightSwitchInteractable : MonoBehaviour
     {
         m_Interactable = GetComponent<XRSimpleInteractable>();
         m_MainCamera = Camera.main;
+        CreateFallbackActivationAction();
     }
 
     void OnEnable()
@@ -49,6 +52,7 @@ public class LightSwitchInteractable : MonoBehaviour
 
         m_Interactable.selectEntered.AddListener(OnSelectEntered);
         m_Interactable.activated.AddListener(OnActivated);
+        m_FallbackActivationAction?.Enable();
     }
 
     void OnDisable()
@@ -58,6 +62,13 @@ public class LightSwitchInteractable : MonoBehaviour
 
         m_Interactable.selectEntered.RemoveListener(OnSelectEntered);
         m_Interactable.activated.RemoveListener(OnActivated);
+        m_FallbackActivationAction?.Disable();
+    }
+
+    void OnDestroy()
+    {
+        m_FallbackActivationAction?.Dispose();
+        m_FallbackActivationAction = null;
     }
 
     void Update()
@@ -65,7 +76,7 @@ public class LightSwitchInteractable : MonoBehaviour
         if (!m_EnableFallbackInput || m_IsOn)
             return;
 
-        var isPressed = IsFallbackActivationPressed();
+        var isPressed = IsFallbackActivationPressedByAction() || IsFallbackActivationPressed();
         if (!isPressed)
         {
             m_WasFallbackPressed = false;
@@ -145,7 +156,21 @@ public class LightSwitchInteractable : MonoBehaviour
         if (!device.isValid)
             return false;
 
-        return device.TryGetFeatureValue(CommonUsages.triggerButton, out var triggerPressed) && triggerPressed ||
-               device.TryGetFeatureValue(CommonUsages.gripButton, out var gripPressed) && gripPressed;
+        return device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out var triggerPressed) && triggerPressed ||
+               device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out var gripPressed) && gripPressed;
+    }
+
+    void CreateFallbackActivationAction()
+    {
+        m_FallbackActivationAction = new InputAction("Fallback Activate Switch", InputActionType.Button, expectedControlType: "Button");
+        m_FallbackActivationAction.AddBinding("<XRController>{LeftHand}/{TriggerButton}");
+        m_FallbackActivationAction.AddBinding("<XRController>{RightHand}/{TriggerButton}");
+        m_FallbackActivationAction.AddBinding("<XRController>{LeftHand}/{GripButton}");
+        m_FallbackActivationAction.AddBinding("<XRController>{RightHand}/{GripButton}");
+    }
+
+    bool IsFallbackActivationPressedByAction()
+    {
+        return m_FallbackActivationAction != null && m_FallbackActivationAction.enabled && m_FallbackActivationAction.IsPressed();
     }
 }
