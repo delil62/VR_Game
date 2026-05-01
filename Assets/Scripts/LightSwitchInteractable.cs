@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
@@ -18,7 +19,18 @@ public class LightSwitchInteractable : MonoBehaviour
     [SerializeField]
     UnityEvent m_OnSwitchActivated = new UnityEvent();
 
+    [SerializeField]
+    bool m_EnableFallbackInput = true;
+
+    [SerializeField]
+    float m_FallbackActivationDistance = 2.2f;
+
+    [SerializeField]
+    float m_FallbackLookAngle = 28f;
+
     XRSimpleInteractable m_Interactable;
+    Camera m_MainCamera;
+    bool m_WasFallbackPressed;
 
     public bool isOn => m_IsOn;
 
@@ -27,6 +39,7 @@ public class LightSwitchInteractable : MonoBehaviour
     void Awake()
     {
         m_Interactable = GetComponent<XRSimpleInteractable>();
+        m_MainCamera = Camera.main;
     }
 
     void OnEnable()
@@ -45,6 +58,27 @@ public class LightSwitchInteractable : MonoBehaviour
 
         m_Interactable.selectEntered.RemoveListener(OnSelectEntered);
         m_Interactable.activated.RemoveListener(OnActivated);
+    }
+
+    void Update()
+    {
+        if (!m_EnableFallbackInput || m_IsOn)
+            return;
+
+        var isPressed = IsFallbackActivationPressed();
+        if (!isPressed)
+        {
+            m_WasFallbackPressed = false;
+            return;
+        }
+
+        if (m_WasFallbackPressed)
+            return;
+
+        m_WasFallbackPressed = true;
+
+        if (IsUserAbleToFallbackActivate())
+            ActivateSwitch();
     }
 
     public void ActivateSwitch()
@@ -82,5 +116,36 @@ public class LightSwitchInteractable : MonoBehaviour
     void OnActivated(ActivateEventArgs args)
     {
         ActivateSwitch();
+    }
+
+    bool IsUserAbleToFallbackActivate()
+    {
+        if (m_MainCamera == null)
+            m_MainCamera = Camera.main;
+
+        if (m_MainCamera == null)
+            return false;
+
+        var cameraTransform = m_MainCamera.transform;
+        var toSwitch = transform.position - cameraTransform.position;
+        if (toSwitch.magnitude > m_FallbackActivationDistance)
+            return false;
+
+        return Vector3.Angle(cameraTransform.forward, toSwitch) <= m_FallbackLookAngle;
+    }
+
+    static bool IsFallbackActivationPressed()
+    {
+        return IsFallbackActivationPressed(XRNode.LeftHand) || IsFallbackActivationPressed(XRNode.RightHand);
+    }
+
+    static bool IsFallbackActivationPressed(XRNode node)
+    {
+        var device = InputDevices.GetDeviceAtXRNode(node);
+        if (!device.isValid)
+            return false;
+
+        return device.TryGetFeatureValue(CommonUsages.triggerButton, out var triggerPressed) && triggerPressed ||
+               device.TryGetFeatureValue(CommonUsages.gripButton, out var gripPressed) && gripPressed;
     }
 }

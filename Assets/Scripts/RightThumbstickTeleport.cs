@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
@@ -43,29 +45,78 @@ public class RightThumbstickTeleport : MonoBehaviour
     [SerializeField]
     float m_SnapTurnAmount = 45f;
 
+    [SerializeField]
+    float m_RaycastDistance = 30f;
+
+    [SerializeField]
+    GameObject m_TeleportReticlePrefab;
+
+    [SerializeField]
+    float m_InputKeepAliveInterval = 2f;
+
     readonly HashSet<Collider> m_SurfaceSet = new();
+    static readonly List<UnityEngine.XR.InputDevice> s_InputDevices = new();
     bool m_IsAiming;
     bool m_IsSnapTurnHeld;
     float m_AimingYawOffset;
+    float m_NextInputKeepAliveTime;
+    Coroutine m_InputWarmupRoutine;
+    GameObject m_TeleportReticleInstance;
+    Behaviour[] m_RightRayLineVisuals;
+    LineRenderer m_RightRayLineRenderer;
 
     void Awake()
     {
         RebuildSurfaceCache();
+        CacheRightRayVisualComponents();
+        CreateTeleportReticle();
         SetTeleportAiming(false);
     }
 
     void OnEnable()
     {
+        InputSystem.onDeviceChange += OnInputSystemDeviceChange;
+        InputTracking.trackingAcquired += OnTrackingAcquired;
+        RefreshQuestInput();
+        RestartInputWarmup();
         SetTeleportAiming(false);
+    }
+
+    void Start()
+    {
+        RefreshQuestInput();
     }
 
     void OnDisable()
     {
+        InputSystem.onDeviceChange -= OnInputSystemDeviceChange;
+        InputTracking.trackingAcquired -= OnTrackingAcquired;
+        StopInputWarmup();
         SetTeleportAiming(false);
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            RefreshQuestInput();
+            RestartInputWarmup();
+        }
+    }
+
+    void OnApplicationPause(bool pauseStatus)
+    {
+        if (!pauseStatus)
+        {
+            RefreshQuestInput();
+            RestartInputWarmup();
+        }
     }
 
     void Update()
     {
+        UpdateInputKeepAlive();
+
         var stick = ReadThumbstick();
         var stickMagnitude = stick.magnitude;
         var wantsAim = stickMagnitude >= m_ActivateThreshold;
@@ -87,6 +138,7 @@ public class RightThumbstickTeleport : MonoBehaviour
         }
 
         UpdateAimingRotation(stick);
+        UpdateTeleportPreview();
 
         var released = stickMagnitude <= m_ReleaseThreshold;
 
@@ -116,9 +168,88 @@ public class RightThumbstickTeleport : MonoBehaviour
         if (!device.isValid)
             return Vector2.zero;
 
-        return device.TryGetFeatureValue(CommonUsages.primary2DAxis, out var stick)
+        return device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out var stick)
             ? stick
             : Vector2.zero;
+    }
+
+    void RefreshQuestInput()
+    {
+        InputDevices.GetDevices(s_InputDevices);
+        ProbeControllerInput(XRNode.LeftHand);
+        ProbeControllerInput(XRNode.RightHand);
+
+        foreach (var actionAsset in Resources.FindObjectsOfTypeAll<InputActionAsset>())
+            actionAsset?.Enable();
+    }
+
+    void UpdateInputKeepAlive()
+    {
+        if (m_InputKeepAliveInterval <= 0f || Time.unscaledTime < m_NextInputKeepAliveTime)
+            return;
+
+        m_NextInputKeepAliveTime = Time.unscaledTime + m_InputKeepAliveInterval;
+        RefreshQuestInput();
+    }
+
+    static void ProbeControllerInput(XRNode node)
+    {
+        var device = InputDevices.GetDeviceAtXRNode(node);
+        if (!device.isValid)
+            return;
+
+        device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 _);
+        device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out bool _);
+        device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out bool _);
+    }
+
+    void RestartInputWarmup()
+    {
+        StopInputWarmup();
+        m_InputWarmupRoutine = StartCoroutine(InputWarmup());
+    }
+
+    void StopInputWarmup()
+    {
+        if (m_InputWarmupRoutine == null)
+            return;
+
+        StopCoroutine(m_InputWarmupRoutine);
+        m_InputWarmupRoutine = null;
+    }
+
+    IEnumerator InputWarmup()
+    {
+        var endTime = Time.realtimeSinceStartup + 8f;
+        while (Time.realtimeSinceStartup < endTime)
+        {
+            RefreshQuestInput();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+
+        m_InputWarmupRoutine = null;
+    }
+
+    void OnInputSystemDeviceChange(UnityEngine.InputSystem.InputDevice device, InputDeviceChange change)
+    {
+        if (change == InputDeviceChange.Added ||
+            change == InputDeviceChange.Reconnected ||
+            change == InputDeviceChange.Enabled ||
+            change == InputDeviceChange.ConfigurationChanged ||
+            change == InputDeviceChange.UsageChanged)
+        {
+            RefreshQuestInput();
+            RestartInputWarmup();
+        }
+    }
+
+    void OnTrackingAcquired(XRNodeState nodeState)
+    {
+        if (nodeState.nodeType != XRNode.LeftHand && nodeState.nodeType != XRNode.RightHand)
+            return;
+
+        RefreshQuestInput();
+        RestartInputWarmup();
     }
 
     void HandleSnapTurn(Vector2 stick)
@@ -144,19 +275,56 @@ public class RightThumbstickTeleport : MonoBehaviour
         if (m_RightRayInteractor != null)
             m_RightRayInteractor.gameObject.SetActive(enabled);
 
+        SetRightRayVisualsVisible(false);
+
         if (m_RightDirectInteractor != null)
             m_RightDirectInteractor.enabled = !enabled;
 
         if (m_ControllerPointerLineVisualizer != null)
+        {
             m_ControllerPointerLineVisualizer.SetVisible(!enabled);
+            m_ControllerPointerLineVisualizer.SetRightTeleportMode(enabled);
+        }
+
+        SetTeleportReticleVisible(false);
     }
 
-    void TryTeleport()
+    void CacheRightRayVisualComponents()
     {
         if (m_RightRayInteractor == null)
             return;
 
-        if (!m_RightRayInteractor.TryGetCurrent3DRaycastHit(out var hit))
+        m_RightRayLineRenderer = m_RightRayInteractor.GetComponent<LineRenderer>();
+
+        var behaviours = m_RightRayInteractor.GetComponents<Behaviour>();
+        var lineVisuals = new List<Behaviour>();
+        foreach (var behaviour in behaviours)
+        {
+            if (behaviour != null && behaviour.GetType().Name.Contains("LineVisual"))
+                lineVisuals.Add(behaviour);
+        }
+
+        m_RightRayLineVisuals = lineVisuals.ToArray();
+    }
+
+    void SetRightRayVisualsVisible(bool visible)
+    {
+        if (m_RightRayLineRenderer != null)
+            m_RightRayLineRenderer.enabled = visible;
+
+        if (m_RightRayLineVisuals == null)
+            return;
+
+        foreach (var lineVisual in m_RightRayLineVisuals)
+        {
+            if (lineVisual != null)
+                lineVisual.enabled = visible;
+        }
+    }
+
+    void TryTeleport()
+    {
+        if (!TryGetTeleportHit(out var hit))
             return;
 
         var teleportAnchor = hit.collider != null ? hit.collider.GetComponentInParent<TeleportationAnchor>() : null;
@@ -171,6 +339,20 @@ public class RightThumbstickTeleport : MonoBehaviour
 
         TeleportTo(hit.point);
         RotateOriginTo(GetTargetRotation(hit, null));
+    }
+
+    bool TryGetTeleportHit(out RaycastHit hit)
+    {
+        hit = default;
+
+        if (m_RightRayInteractor != null && m_RightRayInteractor.TryGetCurrent3DRaycastHit(out hit))
+            return true;
+
+        var rayTransform = m_RightRayInteractor != null ? m_RightRayInteractor.transform : null;
+        if (rayTransform == null)
+            return false;
+
+        return Physics.Raycast(rayTransform.position, rayTransform.forward, out hit, m_RaycastDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
     }
 
     bool IsValidSurface(RaycastHit hit)
@@ -247,6 +429,50 @@ public class RightThumbstickTeleport : MonoBehaviour
             direction = Vector3.forward;
 
         return Quaternion.LookRotation(direction.normalized, Vector3.up) * Quaternion.Euler(0f, m_AimingYawOffset, 0f);
+    }
+
+    void CreateTeleportReticle()
+    {
+        if (m_TeleportReticlePrefab == null)
+            return;
+
+        m_TeleportReticleInstance = Instantiate(m_TeleportReticlePrefab);
+        m_TeleportReticleInstance.name = "Teleport Reticle Preview";
+        SetTeleportReticleVisible(false);
+    }
+
+    void UpdateTeleportPreview()
+    {
+        if (!TryGetTeleportHit(out var hit))
+        {
+            SetTeleportReticleVisible(false);
+            return;
+        }
+
+        var teleportAnchor = hit.collider != null ? hit.collider.GetComponentInParent<TeleportationAnchor>() : null;
+        if (teleportAnchor == null && !IsValidSurface(hit))
+        {
+            SetTeleportReticleVisible(false);
+            return;
+        }
+
+        var targetTransform = teleportAnchor != null
+            ? teleportAnchor.teleportAnchorTransform != null ? teleportAnchor.teleportAnchorTransform : teleportAnchor.transform
+            : null;
+        var targetPosition = targetTransform != null ? targetTransform.position : hit.point;
+        var targetRotation = GetTargetRotation(hit, targetTransform);
+
+        if (m_TeleportReticleInstance != null)
+        {
+            m_TeleportReticleInstance.transform.SetPositionAndRotation(targetPosition, targetRotation);
+            SetTeleportReticleVisible(true);
+        }
+    }
+
+    void SetTeleportReticleVisible(bool visible)
+    {
+        if (m_TeleportReticleInstance != null && m_TeleportReticleInstance.activeSelf != visible)
+            m_TeleportReticleInstance.SetActive(visible);
     }
 
     void SnapTurn(float angle)

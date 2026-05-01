@@ -2329,6 +2329,8 @@ MonoBehaviour:
   m_SnapTurnThreshold: 0.75
   m_SnapTurnReleaseThreshold: 0.35
   m_SnapTurnAmount: 45
+  m_RaycastDistance: 30
+  m_TeleportReticlePrefab: {fileID: 8748868027195207512, guid: 893219773891c784ab469a39151879b4, type: 3}
 --- !u!114 &700000005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2397,7 +2399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &700000021
 Transform:
   m_ObjectHideFlags: 0
@@ -4945,7 +4947,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.16, y: 0.34, z: 0.26}
   m_Center: {x: 0.04, y: 0, z: 0}
@@ -6345,7 +6347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e988983f96fe1dd48800bcdfc82f23e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LineWidth: 0.02
+  m_LineWidth: 0.001
   m_OverrideInteractorLineLength: 0
   m_LineLength: 10
   m_AutoAdjustLineLength: 0
@@ -6481,7 +6483,7 @@ MonoBehaviour:
   m_BendingEnabledInteractionLayers:
     m_Bits: 4294967295
   m_OverrideInteractorLineOrigin: 1
-  m_LineOriginTransform: {fileID: 700000024}
+  m_LineOriginTransform: {fileID: 1522076643}
   m_LineOriginOffset: 0
 --- !u!120 &1522076645
 LineRenderer:
@@ -6616,7 +6618,7 @@ MonoBehaviour:
   m_InteractionLayers:
     m_Bits: 4294967295
   m_Handedness: 2
-  m_AttachTransform: {fileID: 700000024}
+  m_AttachTransform: {fileID: 1522076643}
   m_KeepSelectedTargetValid: 1
   m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
@@ -6766,10 +6768,10 @@ MonoBehaviour:
   m_HapticHoverCancelIntensity: 0
   m_HapticHoverCancelDuration: 0
   m_AllowHoverHapticsWhileSelecting: 1
-  m_LineType: 1
+  m_LineType: 0
   m_BlendVisualLinePoints: 1
   m_MaxRaycastDistance: 30
-  m_RayOriginTransform: {fileID: 0}
+  m_RayOriginTransform: {fileID: 1522076643}
   m_ReferenceFrame: {fileID: 0}
   m_Velocity: 10
   m_Acceleration: 9.8
