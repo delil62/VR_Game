@@ -28,3 +28,4 @@ Thumbs.db
 *.utmp
 mono_crash.*.json
 *_BurstDebugInformation_DoNotShip/
+VRtestGame.apk
