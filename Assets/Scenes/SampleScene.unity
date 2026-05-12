@@ -1542,7 +1542,7 @@ MonoBehaviour:
   m_InteractionManager: {fileID: 0}
   m_Colliders: []
   m_InteractionLayers:
-    m_Bits: 4294967295
+    m_Bits: 2147483648
   m_DistanceCalculationMode: 1
   m_SelectMode: 1
   m_FocusMode: 1
@@ -1610,6 +1610,28 @@ MonoBehaviour:
   m_Teleporting:
     m_PersistentCalls:
       m_Calls: []
+--- !u!64 &354957668
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 354957664}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 3065293033758022507, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
 --- !u!1 &375872071
 GameObject:
   m_ObjectHideFlags: 0
@@ -10659,6 +10681,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8091218050815668505, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 354957666}
+    - targetCorrespondingSourceObject: {fileID: -8091218050815668505, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 354957668}
   m_SourcePrefab: {fileID: 100100000, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
 --- !u!1 &1985172572
 GameObject:
