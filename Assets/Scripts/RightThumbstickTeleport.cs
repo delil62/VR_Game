@@ -78,6 +78,7 @@ public class RightThumbstickTeleport : MonoBehaviour
         CreateRightThumbstickAction();
         CacheRightRayVisualComponents();
         CreateTeleportReticle();
+        EnsureRightRayInteractorIsAvailable();
         SetTeleportAiming(false);
     }
 
@@ -390,8 +391,8 @@ public class RightThumbstickTeleport : MonoBehaviour
     {
         m_IsAiming = enabled;
 
-        if (m_RightRayInteractor != null)
-            m_RightRayInteractor.gameObject.SetActive(enabled);
+        // Keep the ray interactor alive so the right grip can always drive far interactions.
+        EnsureRightRayInteractorIsAvailable();
 
         SetRightRayVisualsVisible(false);
 
@@ -405,6 +406,12 @@ public class RightThumbstickTeleport : MonoBehaviour
         }
 
         SetTeleportReticleVisible(false);
+    }
+
+    void EnsureRightRayInteractorIsAvailable()
+    {
+        if (m_RightRayInteractor != null && !m_RightRayInteractor.gameObject.activeSelf)
+            m_RightRayInteractor.gameObject.SetActive(true);
     }
 
     void CacheRightRayVisualComponents()
