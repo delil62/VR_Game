@@ -7,6 +7,11 @@
 
 
 
+extern void HebelVibration_Start_mAD2FA892C4FFEC08DE47502466F6044651877530 (void);
+extern void HebelVibration_Anvisieren_m2DF1C1A4F02419223B223EC578302AB40F10D76B (void);
+extern void HebelVibration_Wegschauen_m2FEE69682DF751BA707A845F689088BA0CA21C87 (void);
+extern void HebelVibration_Update_m05E340781DE3988E3996EC8F975467824401AB5A (void);
+extern void HebelVibration__ctor_m328EAC0F65C2DBB82C58831856A075E0F41038BC (void);
 extern void BlinkingLight_Start_mA103215C33273EF0BA345A5332B6C482655BDCE4 (void);
 extern void BlinkingLight_Update_mD09AC85DD6D803126F9B9279BEE1C2C654EFE428 (void);
 extern void BlinkingLight_UpdateLightStatus_m818E5C84D20E47A74B1F5612B4BE2EF0E1FDFCAE (void);
@@ -92,6 +97,16 @@ extern void U3CFinalizePlacementU3Ed__16_MoveNext_m2CCA153DED1DFC0149F8653E6B415
 extern void U3CFinalizePlacementU3Ed__16_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m1B1F09F5669B8ADDA40CA222C58F77ED30B45B14 (void);
 extern void U3CFinalizePlacementU3Ed__16_System_Collections_IEnumerator_Reset_m65011FCA645D8FBCB24D23CAC587548914F01708 (void);
 extern void U3CFinalizePlacementU3Ed__16_System_Collections_IEnumerator_get_Current_m62D06648AE3CE8E19ED273031BB03CB7E3E52C1A (void);
+extern void ResetSceneOnControllerCombo_EnsureInstance_m597DEEBC9A62F5724CD7F440873E5F3F4B402361 (void);
+extern void ResetSceneOnControllerCombo_Awake_m6650A8896C827C6532701FD806D820F98180D65F (void);
+extern void ResetSceneOnControllerCombo_OnEnable_mE669151EEF9924835E5A7C2EE68C386310CAA30E (void);
+extern void ResetSceneOnControllerCombo_OnDisable_mC8F00B32519FE7057033DD972D4B8FD100182D8F (void);
+extern void ResetSceneOnControllerCombo_OnDestroy_mF19CB0439D29CC36E96A24DA1C95BF6DD43F4617 (void);
+extern void ResetSceneOnControllerCombo_Update_m1B4D9D82D965F9EE26E4A373773B97B5CA0FDB2B (void);
+extern void ResetSceneOnControllerCombo_CreateResetActions_m99284A78E7C5A96F4E75C0FD171915CE4B8A3654 (void);
+extern void ResetSceneOnControllerCombo_IsResetButtonPressed_m4239E8444F2E4C15E641000C6CFCB5961C01CCFE (void);
+extern void ResetSceneOnControllerCombo_ReloadGameScene_mAA023BCC80101EF345AFFFAEF42A137F2576D86A (void);
+extern void ResetSceneOnControllerCombo__ctor_m6CE1E99C095B23475EE79109282FF4F9D87FDFE2 (void);
 extern void RightThumbstickTeleport_Awake_mDE088E337004D26F5C953D234FFC121C65939C13 (void);
 extern void RightThumbstickTeleport_OnEnable_m84D4EBFA88B4A6830EBB9AAA26DD3D8318D4C4B9 (void);
 extern void RightThumbstickTeleport_Start_mF94FC3FE32476313C8C7B9C329113C19EF236CF7 (void);
@@ -121,6 +136,7 @@ extern void RightThumbstickTeleport_OnInputSystemDeviceChange_mCCCF1A4249A8BD3C7
 extern void RightThumbstickTeleport_OnTrackingAcquired_m84F273FCF251FEA3C3B2AC07B69A56EEFD40BD51 (void);
 extern void RightThumbstickTeleport_HandleSnapTurn_m7FD3054386D58928FD953564C217FD2955B21A0D (void);
 extern void RightThumbstickTeleport_SetTeleportAiming_m21BE799524CCC0708E0092E0E3662FE1DC54FE01 (void);
+extern void RightThumbstickTeleport_EnsureRightRayInteractorIsAvailable_mE03935FC61D48D67129F3A5F26A999B834C331B0 (void);
 extern void RightThumbstickTeleport_CacheRightRayVisualComponents_mDA54072F3CAB847A06500803CDE9F1D88CEE95FA (void);
 extern void RightThumbstickTeleport_SetRightRayVisualsVisible_mF2283313E5CD3CBC8011E158C398CB5182F5F208 (void);
 extern void RightThumbstickTeleport_TryTeleport_m57E82D309B8B5D70BA337A6ECCB6D1585DFA35F0 (void);
@@ -183,8 +199,13 @@ extern void AnchorVisuals_OnAnchorEnter_mE9B77E39B80360DFB9B413B1749CF416F2486E3
 extern void AnchorVisuals_OnAnchorExit_m46DB1144C80EA09930E35E537ADE10D62216F350 (void);
 extern void AnchorVisuals_HideArrowOnTeleport_mAF2775EAD028A9913AECE46CA85A21020EDB1A9D (void);
 extern void AnchorVisuals__ctor_m33BE9FB784CF00841C8359369FF41EC9DD425E67 (void);
-static Il2CppMethodPointer s_methodPointers[176] = 
+static Il2CppMethodPointer s_methodPointers[192] = 
 {
+	HebelVibration_Start_mAD2FA892C4FFEC08DE47502466F6044651877530,
+	HebelVibration_Anvisieren_m2DF1C1A4F02419223B223EC578302AB40F10D76B,
+	HebelVibration_Wegschauen_m2FEE69682DF751BA707A845F689088BA0CA21C87,
+	HebelVibration_Update_m05E340781DE3988E3996EC8F975467824401AB5A,
+	HebelVibration__ctor_m328EAC0F65C2DBB82C58831856A075E0F41038BC,
 	BlinkingLight_Start_mA103215C33273EF0BA345A5332B6C482655BDCE4,
 	BlinkingLight_Update_mD09AC85DD6D803126F9B9279BEE1C2C654EFE428,
 	BlinkingLight_UpdateLightStatus_m818E5C84D20E47A74B1F5612B4BE2EF0E1FDFCAE,
@@ -270,6 +291,16 @@ static Il2CppMethodPointer s_methodPointers[176] =
 	U3CFinalizePlacementU3Ed__16_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m1B1F09F5669B8ADDA40CA222C58F77ED30B45B14,
 	U3CFinalizePlacementU3Ed__16_System_Collections_IEnumerator_Reset_m65011FCA645D8FBCB24D23CAC587548914F01708,
 	U3CFinalizePlacementU3Ed__16_System_Collections_IEnumerator_get_Current_m62D06648AE3CE8E19ED273031BB03CB7E3E52C1A,
+	ResetSceneOnControllerCombo_EnsureInstance_m597DEEBC9A62F5724CD7F440873E5F3F4B402361,
+	ResetSceneOnControllerCombo_Awake_m6650A8896C827C6532701FD806D820F98180D65F,
+	ResetSceneOnControllerCombo_OnEnable_mE669151EEF9924835E5A7C2EE68C386310CAA30E,
+	ResetSceneOnControllerCombo_OnDisable_mC8F00B32519FE7057033DD972D4B8FD100182D8F,
+	ResetSceneOnControllerCombo_OnDestroy_mF19CB0439D29CC36E96A24DA1C95BF6DD43F4617,
+	ResetSceneOnControllerCombo_Update_m1B4D9D82D965F9EE26E4A373773B97B5CA0FDB2B,
+	ResetSceneOnControllerCombo_CreateResetActions_m99284A78E7C5A96F4E75C0FD171915CE4B8A3654,
+	ResetSceneOnControllerCombo_IsResetButtonPressed_m4239E8444F2E4C15E641000C6CFCB5961C01CCFE,
+	ResetSceneOnControllerCombo_ReloadGameScene_mAA023BCC80101EF345AFFFAEF42A137F2576D86A,
+	ResetSceneOnControllerCombo__ctor_m6CE1E99C095B23475EE79109282FF4F9D87FDFE2,
 	RightThumbstickTeleport_Awake_mDE088E337004D26F5C953D234FFC121C65939C13,
 	RightThumbstickTeleport_OnEnable_m84D4EBFA88B4A6830EBB9AAA26DD3D8318D4C4B9,
 	RightThumbstickTeleport_Start_mF94FC3FE32476313C8C7B9C329113C19EF236CF7,
@@ -299,6 +330,7 @@ static Il2CppMethodPointer s_methodPointers[176] =
 	RightThumbstickTeleport_OnTrackingAcquired_m84F273FCF251FEA3C3B2AC07B69A56EEFD40BD51,
 	RightThumbstickTeleport_HandleSnapTurn_m7FD3054386D58928FD953564C217FD2955B21A0D,
 	RightThumbstickTeleport_SetTeleportAiming_m21BE799524CCC0708E0092E0E3662FE1DC54FE01,
+	RightThumbstickTeleport_EnsureRightRayInteractorIsAvailable_mE03935FC61D48D67129F3A5F26A999B834C331B0,
 	RightThumbstickTeleport_CacheRightRayVisualComponents_mDA54072F3CAB847A06500803CDE9F1D88CEE95FA,
 	RightThumbstickTeleport_SetRightRayVisualsVisible_mF2283313E5CD3CBC8011E158C398CB5182F5F208,
 	RightThumbstickTeleport_TryTeleport_m57E82D309B8B5D70BA337A6ECCB6D1585DFA35F0,
@@ -362,8 +394,13 @@ static Il2CppMethodPointer s_methodPointers[176] =
 	AnchorVisuals_HideArrowOnTeleport_mAF2775EAD028A9913AECE46CA85A21020EDB1A9D,
 	AnchorVisuals__ctor_m33BE9FB784CF00841C8359369FF41EC9DD425E67,
 };
-static const int32_t s_InvokerIndices[176] = 
+static const int32_t s_InvokerIndices[192] = 
 {
+	18690,
+	14165,
+	14165,
+	18690,
+	18690,
 	18690,
 	18690,
 	18690,
@@ -416,8 +453,8 @@ static const int32_t s_InvokerIndices[176] =
 	14165,
 	14165,
 	18240,
-	31581,
-	29488,
+	31582,
+	29489,
 	18690,
 	18240,
 	18690,
@@ -449,6 +486,16 @@ static const int32_t s_InvokerIndices[176] =
 	18463,
 	18690,
 	18463,
+	31749,
+	18690,
+	18690,
+	18690,
+	18690,
+	18690,
+	18690,
+	25370,
+	31749,
+	18690,
 	18690,
 	18690,
 	18690,
@@ -462,14 +509,14 @@ static const int32_t s_InvokerIndices[176] =
 	18677,
 	13942,
 	18690,
-	30355,
+	30356,
 	18690,
 	18690,
 	6390,
-	29488,
+	29489,
 	18690,
-	31748,
-	29491,
+	31749,
+	29492,
 	25373,
 	18690,
 	18690,
@@ -478,6 +525,7 @@ static const int32_t s_InvokerIndices[176] =
 	14411,
 	14366,
 	13942,
+	18690,
 	18690,
 	13942,
 	18690,
@@ -493,7 +541,7 @@ static const int32_t s_InvokerIndices[176] =
 	13942,
 	14269,
 	18690,
-	31748,
+	31749,
 	14089,
 	18690,
 	18240,
@@ -518,7 +566,7 @@ static const int32_t s_InvokerIndices[176] =
 	18690,
 	14165,
 	14165,
-	30359,
+	30360,
 	18463,
 	18690,
 	18690,
@@ -532,7 +580,7 @@ static const int32_t s_InvokerIndices[176] =
 	18463,
 	18690,
 	18690,
-	31805,
+	31806,
 	18690,
 	18690,
 	18690,
@@ -545,7 +593,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule;
 const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule = 
 {
 	"Assembly-CSharp.dll",
-	176,
+	192,
 	s_methodPointers,
 	0,
 	NULL,
