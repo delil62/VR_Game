@@ -11,6 +11,11 @@ public class BombCountdownTimer : MonoBehaviour
     [SerializeField]
     TextMesh m_TimerText;
 
+    // --- NEU: PLATZ FÜR DEIN TUTORIAL-CANVAS ---
+    [SerializeField]
+    GameObject m_TutorialCanvas;
+    // -------------------------------------------
+
     float m_RemainingSeconds;
     bool m_IsRunning;
     bool m_HasStarted;
@@ -39,6 +44,13 @@ public class BombCountdownTimer : MonoBehaviour
 
         m_HasStarted = true;
         m_IsRunning = true;
+
+        // --- NEU: TUTORIAL AUTOMATISCH BEIM START AUSBLENDEN ---
+        if (m_TutorialCanvas != null)
+        {
+            m_TutorialCanvas.SetActive(false);
+        }
+        // ------------------------------------------------------
     }
 
     public void ResetTimer()
@@ -58,6 +70,16 @@ public class BombCountdownTimer : MonoBehaviour
         var minutes = totalSeconds / 60;
         var seconds = totalSeconds % 60;
         m_TimerText.text = $"{minutes}:{seconds:00}";
+
+        // --- DER PANIK-MODUS (Nur Rot + Glow) ---
+        if (totalSeconds <= 30)
+        {
+            m_TimerText.color = new Color(3f, 0f, 0f); 
+        }
+        else
+        {
+            m_TimerText.color = new Color(1f, 1f, 1f); 
+        }
     }
 
     void OnValidate()
