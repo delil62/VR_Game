@@ -29,3 +29,6 @@ Thumbs.db
 mono_crash.*.json
 *_BurstDebugInformation_DoNotShip/
 VRtestGame.apk
+*.apk
+/VRTest_BackUpThisFolder_ButDontShipItWithYourGame/il2cppOutput
+/VRTest_BackUpThisFolder_ButDontShipItWithYourGame
