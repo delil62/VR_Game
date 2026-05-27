@@ -11,10 +11,19 @@ public class BombCountdownTimer : MonoBehaviour
     [SerializeField]
     TextMesh m_TimerText;
 
-    // --- NEU: PLATZ FÜR DEIN TUTORIAL-CANVAS ---
     [SerializeField]
     GameObject m_TutorialCanvas;
-    // -------------------------------------------
+
+    // --- NUR DIESE ZWEI REALEN ERWEITERUNGEN FÜR DEN SOUND ---
+    [Header("Audio Einstellungen")]
+    [SerializeField] 
+    AudioSource m_AudioSource; // Der Lautsprecher der Bombe
+
+    [SerializeField] 
+    AudioClip m_Voice1Min;     // Deine Sounddatei für "noch 1 Minute"
+
+    bool m_Played60sWarning;   // Merkt sich, ob der Sound in dieser Runde schon lief
+    // --------------------------------------------------------
 
     float m_RemainingSeconds;
     bool m_IsRunning;
@@ -33,6 +42,18 @@ public class BombCountdownTimer : MonoBehaviour
         m_RemainingSeconds = Mathf.Max(0f, m_RemainingSeconds - Time.deltaTime);
         UpdateTimerText();
 
+        // --- NUR DIESE LOGIK IST NEU: Spielt den Sound exakt bei 60 Sekunden ---
+        int totalSeconds = Mathf.CeilToInt(m_RemainingSeconds);
+        if (totalSeconds == 60 && !m_Played60sWarning)
+        {
+            m_Played60sWarning = true; // Verhindert, dass der Sound mehrfach abspielt
+            if (m_AudioSource != null && m_Voice1Min != null)
+            {
+                m_AudioSource.PlayOneShot(m_Voice1Min);
+            }
+        }
+        // ----------------------------------------------------------------------
+
         if (m_RemainingSeconds <= 0f)
             m_IsRunning = false;
     }
@@ -45,12 +66,10 @@ public class BombCountdownTimer : MonoBehaviour
         m_HasStarted = true;
         m_IsRunning = true;
 
-        // --- NEU: TUTORIAL AUTOMATISCH BEIM START AUSBLENDEN ---
         if (m_TutorialCanvas != null)
         {
             m_TutorialCanvas.SetActive(false);
         }
-        // ------------------------------------------------------
     }
 
     public void ResetTimer()
@@ -58,6 +77,10 @@ public class BombCountdownTimer : MonoBehaviour
         m_HasStarted = false;
         m_IsRunning = false;
         m_RemainingSeconds = Mathf.Max(0f, m_DurationSeconds);
+        
+        // Vergisst das Abspielen beim Reset, damit es in der nächsten Runde wieder geht
+        m_Played60sWarning = false; 
+        
         UpdateTimerText();
     }
 
@@ -71,7 +94,7 @@ public class BombCountdownTimer : MonoBehaviour
         var seconds = totalSeconds % 60;
         m_TimerText.text = $"{minutes}:{seconds:00}";
 
-        // --- DER PANIK-MODUS (Nur Rot + Glow) ---
+        // Der Panik-Modus: Nur Rot ab 30 Sekunden
         if (totalSeconds <= 30)
         {
             m_TimerText.color = new Color(3f, 0f, 0f); 
