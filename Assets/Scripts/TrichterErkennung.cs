@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.XR;
 
 using System.Collections.Generic;
+using TMPro; // WICHTIG: Das erlaubt dem Skript, mit deinem TextMeshPro zu reden!
 
 public class TrichterErkennung : MonoBehaviour
 {
@@ -13,36 +14,42 @@ public class TrichterErkennung : MonoBehaviour
     [Header("Das Ergebnis")]
     [SerializeField] GameObject m_LeererBehaelter;
     [SerializeField] GameObject m_VollerBehaelter;
-    [SerializeField] ParticleSystem m_RauchEffekt; // Kann erstmal leer bleiben, falls du noch keinen hast
+    [SerializeField] ParticleSystem m_RauchEffekt; 
+
+    [Header("UI Anzeige")]
+    public TextMeshProUGUI fortschrittsText; // Das ist der Platzhalter für dein Hologramm!
 
     public float staerke = 1.0f;
-
-    // Unser Gedächtnis: Hier wandern die erkannten Flaschen rein
     private List<GameObject> m_EingefuellteFlaschen = new List<GameObject>();
+
+    void Start()
+    {
+        // Setzt den Text am Anfang sicherheitshalber auf 0/3
+        if (fortschrittsText != null) fortschrittsText.text = "0/3";
+    }
 
     void OnTriggerEnter(Collider other)
     {
         GameObject erkannteFlasche = null;
 
-        // Checken, welche der 3 Flaschen gerade den Trichter berührt
         if (GehoertZurFlasche(other, m_Flasche1)) erkannteFlasche = m_Flasche1;
         else if (GehoertZurFlasche(other, m_Flasche2)) erkannteFlasche = m_Flasche2;
         else if (GehoertZurFlasche(other, m_Flasche3)) erkannteFlasche = m_Flasche3;
 
-        // Wenn es wirklich eine unserer Lösungs-Flaschen ist...
         if (erkannteFlasche != null)
         {
-            // 1. Controller vibrieren lassen (wie vorher)
             Vibriere(other);
 
-            // 2. Prüfen, ob wir genau DIESE Flasche schon eingefüllt haben
             if (!m_EingefuellteFlaschen.Contains(erkannteFlasche))
             {
-                // Flasche ins Gedächtnis aufnehmen
                 m_EingefuellteFlaschen.Add(erkannteFlasche);
-                Debug.Log("Flasche hinzugefügt! Bisher drin: " + m_EingefuellteFlaschen.Count);
+                
+                // HIER PASSIERT DIE MAGIE: Der Text wird live aktualisiert!
+                if (fortschrittsText != null)
+                {
+                    fortschrittsText.text = m_EingefuellteFlaschen.Count + "/3";
+                }
 
-                // 3. Haben wir alle 3 zusammen?
                 if (m_EingefuellteFlaschen.Count >= 3)
                 {
                     RaetselGeloest();
@@ -53,17 +60,16 @@ public class TrichterErkennung : MonoBehaviour
 
     void RaetselGeloest()
     {
-        Debug.Log("BINGO! ALLE 3 FLASCHEN SIND DRIN!");
+        if (fortschrittsText != null)
+        {
+            fortschrittsText.text = "FERTIG!";
+            fortschrittsText.color = new Color32(0, 110, 0, 255); // Wird beim Sieg grün
+        }
 
-        // Leeren Behälter ausschalten, vollen Behälter einschalten
         if (m_LeererBehaelter != null) m_LeererBehaelter.SetActive(false);
         if (m_VollerBehaelter != null) m_VollerBehaelter.SetActive(true);
-
-        // Falls ein Rauch-Effekt zugewiesen ist, abspielen!
         if (m_RauchEffekt != null) m_RauchEffekt.Play();
     }
-
-    // --- Deine funktionierenden Hilfsfunktionen von vorhin ---
 
     void Vibriere(Collider other)
     {
