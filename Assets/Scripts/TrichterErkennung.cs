@@ -16,47 +16,53 @@ public class TrichterErkennung : MonoBehaviour
     [SerializeField] GameObject m_VollerBehaelter;
     [SerializeField] ParticleSystem m_RauchEffekt; 
 
+    [Header("Zwischen-Belohnungen (Spawns)")]
+    [SerializeField] GameObject m_SpawnNachFlasche1; 
+    [SerializeField] GameObject m_SpawnNachFlasche2; 
+
     [Header("UI Anzeige")]
     public TextMeshProUGUI fortschrittsText;
+
+    [Header("Fehler-Strafe")]
+    [SerializeField] GameObject m_FalscheSpawFlasche; 
 
     public float staerke = 1.0f;
     
     private int aktuellerSchritt = 0;
     private bool raetselGeloest = false;
 
-    // NEU: Die beiden Schutzschilde gegen VR-Glitches!
     private List<GameObject> bereitsAbgehakteFlaschen = new List<GameObject>();
     private float letzteErkennung = 0f;
-    private float cooldown = 1.0f; // 1 Sekunde Pause nach jeder Bewegung
+    private float cooldown = 1.0f; 
 
     void Start()
     {
         if (fortschrittsText != null) fortschrittsText.text = "0/3";
+        
+        if (m_FalscheSpawFlasche != null) m_FalscheSpawFlasche.SetActive(false); 
+        if (m_SpawnNachFlasche1 != null) m_SpawnNachFlasche1.SetActive(false);
+        if (m_SpawnNachFlasche2 != null) m_SpawnNachFlasche2.SetActive(false);
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (raetselGeloest) return;
 
-        // SCHUTZ 1: Anti-Spam-Timer. Ist die letzte Aktion weniger als 1 Sek. her? -> Ignorieren!
         if (Time.time < letzteErkennung + cooldown) return;
 
         UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable gegriffenesItem = other.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
         if (gegriffenesItem == null) return; 
 
-        // Welche unserer 3 Flaschen wurde berührt?
         GameObject erkannteFlasche = null;
         if (GehoertZurFlasche(other, m_Flasche1)) erkannteFlasche = m_Flasche1;
         else if (GehoertZurFlasche(other, m_Flasche2)) erkannteFlasche = m_Flasche2;
         else if (GehoertZurFlasche(other, m_Flasche3)) erkannteFlasche = m_Flasche3;
 
-        // SCHUTZ 2: Die VIP-Liste. Wurde diese Flasche schon erfolgreich benutzt? -> Ignorieren!
         if (erkannteFlasche != null && bereitsAbgehakteFlaschen.Contains(erkannteFlasche))
         {
-            return; // Nix passiert, Flasche ist sicher verbucht!
+            return; 
         }
 
-        // Ab hier gilt es! Der Timer für die nächste Sekunde Sperre startet:
         letzteErkennung = Time.time;
 
         bool istRichtigeFlasche = false;
@@ -68,14 +74,30 @@ public class TrichterErkennung : MonoBehaviour
         if (istRichtigeFlasche)
         {
             Vibriere(other);
-            
-            // Die Flasche auf die VIP-Liste setzen, damit sie nicht nochmal triggert
             bereitsAbgehakteFlaschen.Add(erkannteFlasche); 
             aktuellerSchritt++;
             
             if (fortschrittsText != null)
             {
                 fortschrittsText.text = aktuellerSchritt + "/3";
+            }
+
+            // --- HIER IST DIE NEUE MAGIE ---
+            // Sobald du EINE Sache richtig machst, räumen wir alten Müll weg!
+            if (m_FalscheSpawFlasche != null)
+            {
+                m_FalscheSpawFlasche.SetActive(false); 
+            }
+            // ---------------------------------
+
+            if (aktuellerSchritt == 1)
+            {
+                if (m_SpawnNachFlasche1 != null) m_SpawnNachFlasche1.SetActive(true);
+            }
+            else if (aktuellerSchritt == 2)
+            {
+                if (m_SpawnNachFlasche1 != null) m_SpawnNachFlasche1.SetActive(false); 
+                if (m_SpawnNachFlasche2 != null) m_SpawnNachFlasche2.SetActive(true);
             }
 
             if (aktuellerSchritt >= 3)
@@ -85,18 +107,25 @@ public class TrichterErkennung : MonoBehaviour
         }
         else
         {
-            // FALSCHES ITEM ODER FALSCHE REIHENFOLGE!
             Vibriere(other); 
             
             aktuellerSchritt = 0;
-            bereitsAbgehakteFlaschen.Clear(); // VIP-Liste komplett löschen, man muss wieder bei 0 anfangen!
+            bereitsAbgehakteFlaschen.Clear();
             
             if (fortschrittsText != null)
             {
                 fortschrittsText.text = "0/3";
             }
             
-            Debug.Log("Falsches Objekt! Zähler auf 0, Liste geleert.");
+            if (m_FalscheSpawFlasche != null)
+            {
+                m_FalscheSpawFlasche.SetActive(true);
+            }
+
+            if (m_SpawnNachFlasche1 != null) m_SpawnNachFlasche1.SetActive(false);
+            if (m_SpawnNachFlasche2 != null) m_SpawnNachFlasche2.SetActive(false);
+            
+            Debug.Log("Falsches Objekt! Zähler auf 0, Straf-Flasche an, Belohnungen weg.");
         }
     }
 
@@ -111,8 +140,12 @@ public class TrichterErkennung : MonoBehaviour
         }
 
         if (m_LeererBehaelter != null) m_LeererBehaelter.SetActive(false);
-        if (m_VollerBehaelter != null) m_VollerBehaelter.SetActive(true);
+        if (m_VollerBehaelter != null) m_VollerBehaelter.SetActive(true); 
         if (m_RauchEffekt != null) m_RauchEffekt.Play();
+
+        if (m_FalscheSpawFlasche != null) m_FalscheSpawFlasche.SetActive(false);
+        if (m_SpawnNachFlasche1 != null) m_SpawnNachFlasche1.SetActive(false);
+        if (m_SpawnNachFlasche2 != null) m_SpawnNachFlasche2.SetActive(false);
     }
 
     void Vibriere(Collider other)
