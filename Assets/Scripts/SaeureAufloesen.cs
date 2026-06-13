@@ -12,7 +12,7 @@ public class SaeureAufloesen : MonoBehaviour
     public GameObject saeure;
 
     [Header("Zeit & Sound")]
-    public float aufloesungsDauer = 3.0f; // Die perfekten 3 Sekunden!
+    public float aufloesungsDauer = 2.0f; // Die perfekten 2 Sekunden!
     public AudioClip aufloeseSound;       // Dein Sound-Feld bleibt da
 
     private float m_Timer = 0.0f;
