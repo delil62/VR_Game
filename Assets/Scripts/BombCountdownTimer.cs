@@ -115,4 +115,11 @@ public class BombCountdownTimer : MonoBehaviour
             UpdateTimerText();
         }
     }
+    // Diesen Block unten ins Timer-Skript einfügen:
+    public void TimerStoppen()
+    {
+        m_IsRunning = false; // BÄM! Das zieht den Stecker der Uhr.
+        
+        Debug.Log("Der Timer wurde erfolgreich gestoppt!");
+    }
 }
