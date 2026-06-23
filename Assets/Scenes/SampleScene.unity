@@ -20022,6 +20022,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.791
       objectReference: {fileID: 0}
+    - target: {fileID: 7151785804551985992, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: daf4de36631bd4ad090b0ec251b7553d, type: 2}
     - target: {fileID: 8159407352794654301, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.115
@@ -20148,9 +20152,10 @@ PrefabInstance:
     - {fileID: 1743963355008385838, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
     - {fileID: -703167680255956723, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
     - {fileID: 1076862158520055545, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
+    - {fileID: 5177406550076812076, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
-      insertIndex: 78
+      insertIndex: -1
       addedObject: {fileID: 1813774278}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 59321d8120214484fab8a6c1f2fff66b, type: 3}
       insertIndex: -1
