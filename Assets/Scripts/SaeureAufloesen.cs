@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.XR;
-
 using System.Collections.Generic;
 
 public class SaeureAufloesen : MonoBehaviour
@@ -10,6 +9,10 @@ public class SaeureAufloesen : MonoBehaviour
 
     [Header("Was soll verschwinden?")]
     public GameObject saeure;
+
+    // NEU: Hier ist das zusätzliche Feld für das Objekt, das mit verschwinden soll
+    [Tooltip("Ein weiteres Objekt (z.B. Halterung, Deckel), das gleichzeitig unsichtbar werden soll")]
+    public GameObject weiteresObjekt;
 
     [Header("Zeit & Sound")]
     public float aufloesungsDauer = 2.0f; // Die perfekten 2 Sekunden!
@@ -35,7 +38,7 @@ public class SaeureAufloesen : MonoBehaviour
                 Vibriere(m_GlasCollider, aktuelleStaerke);
             }
 
-            // Erst nach Ablauf der 3 Sekunden passiert das Finale
+            // Erst nach Ablauf der voreingestellten Sekunden passiert das Finale
             if (m_Timer >= aufloesungsDauer)
             {
                 m_IstAufgeloest = true;
@@ -52,7 +55,13 @@ public class SaeureAufloesen : MonoBehaviour
                     saeure.SetActive(false);
                 }
                 
-                Debug.Log("Säure nach 3 Sekunden erfolgreich aufgelöst!");
+                // NEU: Das zusätzliche Objekt wird jetzt ebenfalls ausgeschaltet!
+                if (weiteresObjekt != null)
+                {
+                    weiteresObjekt.SetActive(false);
+                }
+                
+                Debug.Log("Säure und zusätzliches Objekt erfolgreich aufgelöst!");
             }
         }
     }

@@ -14,6 +14,10 @@ public class FestplattenManager : MonoBehaviour
     [Header("Die Verbindung zum Timer")]
     public BombCountdownTimer meinTimer; // Hier den echten Skriptnamen eintragen!
 
+    // NEU: Hier kommt der Steckplatz für deinen Bildschirm hin
+    [Header("Der Gewinner-Bildschirm")]
+    public GameObject gewinnerBildschirm;
+
     private bool raetselGeloest = false;
 
     void Update()
@@ -41,13 +45,19 @@ public class FestplattenManager : MonoBehaviour
                     erfolgsSound.Play(); 
                 }
 
-                // NEU: Den Timer anhalten!
+                // Den Timer anhalten!
                 if (meinTimer != null)
                 {
                     meinTimer.TimerStoppen();
                 }
 
-                Debug.Log("Festplatte ist richtig drin! Timer gestoppt.");
+                // NEU: Den Winning-Screen einschalten!
+                if (gewinnerBildschirm != null)
+                {
+                    gewinnerBildschirm.SetActive(true);
+                }
+
+                Debug.Log("Festplatte ist richtig drin! Timer gestoppt und Winning Screen aktiv.");
             }
         }
     }

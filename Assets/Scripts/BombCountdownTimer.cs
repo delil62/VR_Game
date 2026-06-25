@@ -25,6 +25,18 @@ public class BombCountdownTimer : MonoBehaviour
     bool m_Played60sWarning;   // Merkt sich, ob der Sound in dieser Runde schon lief
     // --------------------------------------------------------
 
+    // NEU: HIER IST DAS FELD FÜR DEIN BILD
+    [Header("Das Start-Bild")]
+    [SerializeField] 
+    GameObject m_StartBild; 
+    // --------------------------------------------------------
+
+    // NEU: HIER IST DAS FELD FÜR DEINEN GAME-OVER-SCREEN
+    [Header("Der Verlierer-Bildschirm")]
+    [SerializeField] 
+    GameObject m_VerliererBildschirm; 
+    // --------------------------------------------------------
+
     float m_RemainingSeconds;
     bool m_IsRunning;
     bool m_HasStarted;
@@ -54,8 +66,16 @@ public class BombCountdownTimer : MonoBehaviour
         }
         // ----------------------------------------------------------------------
 
+        // HIER WURDE DIE LOGIK FÜR DEN VERLIERER-BILDSCHIRM ERWEITERT
         if (m_RemainingSeconds <= 0f)
+        {
             m_IsRunning = false;
+
+            if (m_VerliererBildschirm != null)
+            {
+                m_VerliererBildschirm.SetActive(true);
+            }
+        }
     }
 
     public void StartTimer()
@@ -69,6 +89,12 @@ public class BombCountdownTimer : MonoBehaviour
         if (m_TutorialCanvas != null)
         {
             m_TutorialCanvas.SetActive(false);
+        }
+
+        // NEU: HIER WIRD DAS BILD AUSGEBLENDET, SOBALD DER TIMER STARTET
+        if (m_StartBild != null)
+        {
+            m_StartBild.SetActive(false);
         }
     }
 
@@ -115,6 +141,7 @@ public class BombCountdownTimer : MonoBehaviour
             UpdateTimerText();
         }
     }
+    
     // Diesen Block unten ins Timer-Skript einfügen:
     public void TimerStoppen()
     {
